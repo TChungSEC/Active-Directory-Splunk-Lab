@@ -1,4 +1,4 @@
-# Active-Directory-Splunk-Lab
+![image](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/ba4f5e2f-9d41-4492-982f-21baeea82b4b)# Active-Directory-Splunk-Lab
 
 <h2>Description</h2>
 In this lab we will create be creating 4 different Virtual Machines (VMs). A Windows server with Active Directory, a Splunk server, a Windows target machine, and a Kali Linux instance. We will be setting up A Splunk server to monitor logs sent from our Windows server and target machine (enabled by Sysmon and Splunk Universal Forwarder), and later use Kali Linux to attempt an RDP (Remote Desktop Protocol) bruteforce on our Active Directory so we can analyze those logs. I will not be walking through the installation of the Windows or Kali machine, but will include a walkthrough of setting up and configuring the machines.
@@ -107,11 +107,11 @@ Back in Splunk, we need to set our IP to match our diagram (192.168.10.10). You 
 
 The dchp setting should be set to *true*, so remove that and type *no*
 
-Press enter, and tab 3 times, then type *addresses:*. Press Space once, and in square brackets, type in our desired address. *[192.168.10.10/24]*
+Press enter, and tab 3 times, then type *addresses:*. Press Space once, and in square brackets, type in our desired address: *[192.168.10.10/24]*
 
 Press enter, and tab 3 times again. Type *nameservers:* and press space once.
 
-Press enter again, and this time press tab 5 times. Type in *addresses:* [8.8.8.8]
+Press enter again, and this time press tab 5 times. Type in *addresses: [8.8.8.8]*
 
 Enter again, tab 3 times, and type in *routes:* press space once, and enter.
 
@@ -204,6 +204,193 @@ Now, anytime the virtual machine starts it will run as the user "splunk". Congra
 <h2>Installing and configuring Sysmon and Splunk Universal Forwarder on Windows Machines</h2> 
 
 The process for installing and configuring both Sysmon and Splunk Universal Forwarder is nearly identical for both machines. This walkthrough shows how to do it on the Target PC, but you can emulate the steps again to configure for the Windows Server as well.
+
+Let's begin configuring our Target Machine. Firstly, let's change the hostname to Target-PC. In the windows search menu, search for "PC".
+
+Select properties from the "This PC" app, and then select "Rename".
+
+![39 renamepc](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/64a3f8e2-019f-4ae0-965f-e36497d0e21d)
+
+Let's name it *"Target-PC"*. Confirm and restart the VM.
+
+Now, let's change our IP so it doesn't interfere with any of our other machines.
+
+Right click the Network icon in the lower righthand screen, and select "Open Network & Internet settings".
+
+Scroll down to "Change adapter options". Right click the adapter, then select "Properties", and double click Internet Protocol version 4 (TCP /IPv4).
+
+We will set a static IP of *192.168.10.100*. You can copy my settings below.
+
+![39 ip fix](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/6756fefa-1165-4da9-8e8c-b85d3c69b18c)
+
+Now we should have a static ip set. You can double check in the command prompt by typing *"ipconfig"*.
+
+Next, let's check on our Splunk server. 
+
+To do this, in a web browser navigate to *192.168.10.10:8000*
+
+It should bring up a login page.
+
+![40 splunk connected](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/1e4bd51b-7ab6-4609-b845-13b72a028e54)
+
+Now, let's install Splunk Universal Forwarder. Navigate to (https://www.splunk.com/en_us/download/universal-forwarder.html) and download the correct version for you Windows architecture. In my case, it is the 64-bit version.
+
+After downloading SUF, head to the folder you downloaded it to and run the .msi file.
+
+Check the box to accept the licensing agreement, and also make sure the "An on-premises Splunk Enterprise instance" is checked, not the cloud option.
+
+On the next page designate the username *"admin"* and leave the "Generate random password" on and click next. 
+
+On the Deployment server page, leave it empty and click next.
+
+On the Receiving Indexer page, we want to input our Splunk server's information. In our case it is *192.168.10.10*. The default port is 9997, so leave it as such and select "Next", and "Install".
+
+![41 splunk UF setting install](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/25542a44-cf10-4807-9fe6-9d319058c24a)
+
+After the SUF is installed, let's install Sysmon. Navigate to (https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) and select "Download Sysmon".
+
+We need a custom Sysmon configuration so get it here: (https://github.com/olafhartong/sysmon-modular).
+
+Scroll down and select *"sysmonconfig.xml"*
+
+![42 sysmon config](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/9935a4be-952a-4f13-8281-447e879bca00)
+
+Select "Raw", then right click and "Save as" in your downloads directory. 
+
+Now navigate to your downloads directory and you should see the Sysmon folder you downloaded earlier. Right click it and "Extract all".
+
+Next open Powershell and *cd* to the file path of your extracted Sysmon folder. Once in the folder, run sysmon.exe using the configuration we just downloaded by inputting the following:
+
+![43 install sysmon](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/001b621c-e831-4920-91e4-74f27a85c8b7)
+
+Press enter, click agree, and Sysmon should install. You can close out Powershell after this.
+
+*Now is the most important part.* We need to instruct our Splunk Forwarder on what we want to send over to our Splunk server.
+
+Navigate to *C:/Program files/SplunkUniversalForwarder/etc/system/local*.
+
+Now run Notepad as administrator, and paste in the following:
+
+[WinEventLog://Application]
+
+index = endpoint
+
+disabled = false
+
+[WinEventLog://Security]
+
+index = endpoint
+
+disabled = false
+
+[WinEventLog://System]
+
+index = endpoint
+
+disabled = false
+
+[WinEventLog://Microsoft-Windows-Sysmon/Operational]
+
+index = endpoint
+
+disabled = false
+
+renderXml = true
+
+source = XmlWinEventLog:Microsoft-Windows-Sysmon/Operational
+
+Save this file to *C:/Program files/SplunkUniversalForwarder/etc/system/local* as inputs.conf
+
+After changing our inputs file, we must always restart the SUF service. Search for "services" and run as administrator. Find the SplunkForwarder service and scroll to the right. Under the "Log on as" column, you will see it defaulted as NT SERVICE. We need to change it to Local System Account. To change it, double-click the service, and change the tab to "Log on", and check the "Local System account" setting. You will get a notice to restart the service, which we'll do next.
+
+![44 splunk service](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/ab0f50bd-a0d0-4e63-93b1-dddf013a3682)
+
+Right click the SplunkForwarder service and selecrt "Restart".
+
+Now we both Sysmon and SUF installed, along with the updated inputs.conf file. Now we can finalize our Splunk server configuration.
+
+Head back to the Splunk web portal at *192.168.10.10:8000* and login using the credentials we created during the splunk install on our server.
+
+![40 splunk connected](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/4282f87a-b225-4acf-b461-0a81f13738f8)
+
+On the launch screen, select "Settings" at the top and then from the drop-down menu select "Indexes".
+
+![44 indexes](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/2ccd85bc-5919-429f-adef-43d54b7e893b)
+
+If you remember from our configuration file, it is sending our logs to an index called endpoint. It doesn't exist yet so we need to create it now.
+
+Select "New Index".
+
+Type in "endpoint" as the name and then save. 
+
+![44 endpoint](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/aabb7b14-3605-42d3-9be3-b8c93b3461a1)
+
+Next we need to enable our Splunk server to receive the data. 
+
+Navigate to "Settings" > "Forwarding and receiving".
+
+On this page under "Receive Data" select "Configure receiving".
+
+![44 receive data](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/62a06b44-1999-45e4-9a47-92bec1345750)
+
+In the upper right hand corner select "New receiving port".
+
+In the "Listen on this port" field input *9997*, and click "Save".
+
+If everything is configured correctly, we should now be receiving data to our endpoint index.
+
+To verify, navigate to "Apps" in the top left corner, then from the drop down menu select "Search & Reporting".
+
+In the search box you can search for *index=endpoint*. If events are logged and your machine (Target-PC) is showing up in the "hosts" section, everything is configured successfully.
+
+![44 index endpoint search](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/2d38573a-e22a-4b55-a34d-e4ae41446b7a)
+
+Congratulations! You have successfully installed and configured Sysmon and Splunk Universal Forwarder on your target machine. Now you can follow the same steps to install Sysmon and SUF on your Windows Server machine.
+
+<h2>Install and Configure Active Directory on Windows Server</h2> 
+
+Now it's time to get Active Directory up and running on our Windows Server. After that we will promote it to the Domain Controller, and then finally configure our target machine to join our domain. Let's get started!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
