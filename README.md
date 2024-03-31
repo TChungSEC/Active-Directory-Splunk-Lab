@@ -201,11 +201,9 @@ After that, input the following:
 
 Now, anytime the virtual machine starts it will run as the user "splunk". Congratulations, we are done configuring our Splunk machine!
 
-<h2>Installing and configuring Sysmon and Splunk Universal Forwarder on Target PC and Windows Server</h2> 
+<h2>Installing and configuring Sysmon and Splunk Universal Forwarder on Windows Machines</h2> 
 
-The process for installing and configuring both Sysmon and Splunk Universal Forwarder are nearly identical for both machines. This walkthrough shows how to do it on the Target PC, but you can emulate the steps again to configure for the Windows Server as well.
-
-
+The process for installing and configuring both Sysmon and Splunk Universal Forwarder is nearly identical for both machines. This walkthrough shows how to do it on the Target PC, but you can emulate the steps again to configure for the Windows Server as well.
 
 
 
@@ -243,9 +241,9 @@ The process for installing and configuring both Sysmon and Splunk Universal Forw
 
 
 
-<h2>Install and Configure Sysmon and Splunk Universal Forwarder</h2> 
 
-Now we need to set up Sysmon and Splunk Universal Forwader on our Windows 2022 Server and target machine. The process is exactly the same for both machines, so I will walk through how to do it on one machine, and you may replicate it on the other machine as well. 
+
+
 
 
 
