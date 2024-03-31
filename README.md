@@ -9,10 +9,10 @@ In this lab we will create be creating 4 different Virtual Machines (VMs). A Win
 - <b>Windows 10</b> (https://go.microsoft.com/fwlink/?LinkId=2265055)
 - <b>Windows Server 2022</b> (https://info.microsoft.com/ww-landing-windows-server-2022.html)
 - <b>Kali Linux</b> (https://www.kali.org/get-kali/#kali-virtual-machines)
-- <b>Microsoft Active Directory</b>  ()
 - <b>Oracle VirtualBox VM</b> (https://www.virtualbox.org/wiki/Downloads)
 - <b>Sysmon</b> (https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 - <b>Splunk Universal Forwarder</b> (https://www.splunk.com/en_us/download/universal-forwarder.html)
+- <b>Microsoft Active Directory</b>
 
 <h2>Pre-requsites:</h2>
 I recommend at least 8gb of RAM to complete this lab. Any less and you likely will have problems running the machines simultaneously (often 3 are required to run at once.) Please set up the VMs in your virtualization software of choice. For this lab I am using VirtualBox. (Walkthrough on Splunk setup further in the lab.) Make sure the NAT type is set to NAT Networking, and allocate at least 25GB per machine (recommended 50GB). If you have less than 8GB of RAM, I recommend allocating 2GB of RAM for each machine. If you have >16GB, you may allocated more for a smoother experience. Let's begin!
@@ -350,6 +350,78 @@ Congratulations! You have successfully installed and configured Sysmon and Splun
 <h2>Install and Configure Active Directory on Windows Server</h2> 
 
 Now it's time to get Active Directory up and running on our Windows Server. After that we will promote it to the Domain Controller, and then finally configure our target machine to join our domain. Let's get started!
+
+Start by booting up the Windows 2022 Server if you haven't already. Once logged in, open the Server Mananger.
+
+Here, navigate to the top right and select "Manage" > "Add Roles & Features". Keep clicking "Next" until you reach the "Server Roles" section. Here, select "Active Directory Domain Services" and then "Add Features". 
+
+![45 install ADDS](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/69d8bfca-d2fb-4e01-9108-0b404feb5595)
+
+Continue clicking "Next" until you get to the "Install" option. It should take a few minutes to install, but when it finishes you can select "Close".
+
+Now you can click on the flag icon next to "Manage". Click "Promote this server to a domain controller".
+
+![46 promote 2 contorlla](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/dc174073-5292-47ce-9c10-398a636a70fa)
+
+On this page, select "Add a new forest" and set the Root Domain Name as anything you'd like, as long as it has a "." in the middle. You must include the "." because your domain name must have a top level domain. I have set the name to *test.local*. After choosing a name select "Next".
+
+![47 root domain](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/c9fcae04-dd41-4bfc-b566-19e44de99197)
+
+In the "Domain Controll Options" page you must put in a password. Remember it.
+
+Keep selecting "Next" until you are able to install. After finishing, your server should automatically restart. You'll notice after unlocking this time, in the bottom left hand corner you'll see your recently created domain followed by a "/". This indicates that we have successfully installed ADDS and promoted our server to a domain controller. Congrats! You got Active Directory up and running on your Windows Server. Now log in.
+
+![48 AD SUCCESS](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/4454f35a-1867-48a0-b21f-0165df69dade)
+
+
+<h2>Creating New Users</h2> 
+After logging in, in the Server Manager navigate to "Tools" in the top right corner, and then select "Active Directory Users and Computers" from the drop-down menu. This is where we can create objects such as users, groups, and more.
+
+![49 DOMAIN EXPANSION](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/d630e286-f339-4cd7-ba5a-cec2fa26dd84)
+
+Let's create a new Organizational Unit for our domain to mimic a more life-like scenario, where departments are usually separated. 
+
+Right click your domain, and in the drop-down menu navigate to "New" > "Organizational Unit".
+
+Name it "IT" and click "OK". Now a new Organizational Unit folder called "IT" should appear under our domain.
+
+![50 New folda](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/4c6cbf73-f120-436c-abb5-6eb67ecff7af)
+
+Now right click the folder and from the drop-down menu, navigate to "New" > "User".
+
+We'll name him "Tao Chung", and make his username "tchung", then select "Next". Set the password as something you will remember, because we'll need to add it to our brute force dictionary later on. Also uncheck "User must change password at next logon", because this is just a lab environment and it's unnecessary.
+
+![51 NEw user](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/81ab6ce4-39f3-4aa2-a7be-7109899354b0)
+
+We can see our new user has been created.
+
+![52 new user added](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/1dd82ec3-e64e-40d3-8e03-85859004cad9)
+
+Now Let's create another Organizational Unit called "HR". Here we will add a user named "Jenny Smith" with the username "jsmith".
+
+![53 New user new domain](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/9c124ed1-098a-4b4f-857a-b7ac7e9fb429)
+
+Now that Active Directory is set up and our Server is now the domain controller, we will now join our Windows machine to our newly created domain (test.local).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
