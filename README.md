@@ -401,7 +401,45 @@ Now Let's create another Organizational Unit called "HR". Here we will add a use
 
 ![53 New user new domain](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/9c124ed1-098a-4b4f-857a-b7ac7e9fb429)
 
-Now that Active Directory is set up and our Server is now the domain controller, we will now join our Windows machine to our newly created domain (test.local).
+<h2>Joining Windows Machine to New Domain</h2>
+Now that Active Directory is set up and our Server is now the domain controller, we will now join our Windows machine to our newly created domain *test.local*, and authenticate using Jenny Smith's account.
+
+On our Windows 10 machine, search up "PC" then click on "Properties". Scroll down and select "Advanced system settings". Select the "Computer Name" tab, and then select "Change".
+
+Select the Domain option, and enter your newly created domain *test.local*
+
+![54 new doman pc](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/b6d4329e-0923-44c2-b8f9-18702cfcb41e)
+
+You will probably get an error message saying the domain could not be contacted. This is because our target machine does not know how to resolve *test.local* 
+
+![55 error](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/e356b0f7-fd02-46fb-9a08-6a8963708fed)
+
+We can fix this by right clicking our network adapter, and selecting "Open Network & Internet settings". From here, select "Change adapter options". Right click your adapter, and select "Properties", then double-click "Internet Protocol Version 4 (TCP/ IPv4)". Our DNS server should be pointing to *8.8.8.8*. We need to change it to point at the domain controller *(192.168.10.7)*. Keep everything the same and just change the preferred DNS server to our domain controller. Select "OK" and close out of the window.
+
+![56 dns server fixed](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/550c2ecc-6b4f-448d-adab-c735070b0e82)
+
+Now head back to our domain options where we were previously denied, and we should get a prompt to login. Enter our domain's administrator credentials and select "OK". A window should appear that says "Welcome to the *test.local* domain. Select "OK", and "OK" again, and you'll be prompted to restart the computer. Select "Restart Now".
+
+![57 success](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/5c84b2e2-6afb-4e2e-ac3e-987c4ddb611e)
+
+Once you're at the logon screen, select "Other User" in the bottom lefthand corner. We're going to log on as Jenny Smith.
+
+![58 other user](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/75f4a774-c192-4691-badc-60b6b9e9312c)
+
+Congrats, you should be logged in as user "jsmith" now. Your target machine is now configured and joined to the domain. You now have a fully functional Active Directory server lab to play around with. I recommend snapshotting your VM here incase you break anything while learning so you can restore from a fresh state.
+
+![59 grats!](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/f882d2fe-e4e8-4c14-ab0a-abcc02d42810)
+
+<h2>Using Kali Linux to Conduct a Brute Force Attack</h2>
+
+
+
+
+
+
+
+
+
 
 
 
