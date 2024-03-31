@@ -5,7 +5,7 @@ In this lab we will create be creating 4 different Virtual Machines (VMs). A Win
 
 <h2>Environments & Tools used:</h2>
 
-- <b>Splunk Enterprise Server</b> (https://www.splunk.com/en_us/download/splunk-enterprise.html)
+- <b>Splunk</b> (https://www.splunk.com/en_us/download/splunk-enterprise.html)
 - <b>Windows 10</b> (https://go.microsoft.com/fwlink/?LinkId=2265055)
 - <b>Windows Server 2022</b> (https://info.microsoft.com/ww-landing-windows-server-2022.html)
 - <b>Kali Linux</b> (https://www.kali.org/get-kali/#kali-virtual-machines)
@@ -101,9 +101,99 @@ After finishing you will be met with this screen. Go ahead and press enter and o
 
 Now that Splunk is installed and operational, refer to the "*Setting up NAT Networking*" of this guide above to enable NAT Networking on all your machines.
 
+Back in Splunk, we need to set our IP to match our diagram (192.168.10.10). You can use the command *ip a* to see if you got lucky and it matches, but chances are it doesn't. So we need to configure our Splunk server to have that IP. Use the following command to do so.
+
+![24 splunk config](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/9b73fc93-f89d-4689-9c4a-291437597e2d)
+
+The dchp setting should be set to *true*, so remove that and type *no*
+
+Press enter, and tab 3 times, then type *addresses:*. Press Space once, and in square brackets, type in our desired address. *[192.168.10.10/24]*
+
+Press enter, and tab 3 times again. Type *nameservers:* and press space once.
+
+Press enter again, and this time press tab 5 times. Type in *addresses:* [8.8.8.8]
+
+Enter again, tab 3 times, and type in *routes:* press space once, and enter.
+
+Tab 5 times, and type *- to: default*
+
+Press enter again, and tab 6 times. Type *via: 192.168.10.1*
+
+It should look like this:
+
+![25 splunk configga](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/70793980-23fe-46ff-b55d-f645052494c9)
+
+Now we want to save all this configuration by holding "Ctrl" + "x". Press "y" to confirm, and then "Enter". Done.
+
+Now type *sudo netplan apply* to apply the new settings.
+
+![26 apply](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/a1406109-91b0-4384-918d-6096c95dc46d)
+
+If you type out *ip a* again it should show the correct IP address. You can ping google.com to see if you have a connection. If you failed to connect, please recheck your formatting on the network settings.
+
+After you are configured, you can go ahead and download Splunk Enterprise on your host machine- Not your VMs. We want the Linux .deb file, located here: (https://www.splunk.com/en_us/download/splunk-enterprise.html?locale=en_us)
+
+After downloading and saving it, continue ahead. We'll use it later.
+
+Back in our Splunk Virtual Machine, we need to install the guest addons for Virtualbox. To do that, enter the following syntax:
+
+![28 get VB](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/963f68f8-4e62-4961-81a6-de3d3a8ef26b)
+
+It may take some time to install. After finishing, reboot and our package should be installed. 
+
+We still need one more addon, so repeat the process above but install "guest-utils"
+
+![31 guest-utils, pair with vbox install previous](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/9f05be2f-58a6-47bb-b82e-d253800e4f9d)
+
+After installing and rebooting, continue with the next steps.
+
+In the VB menu of your Splunk instance, select "Devices" > "Shared Folders" > "Shared Folder Settings..." Select the new folder icon.
+
+![29 new folder](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/a450ec21-2866-407a-9e5c-7b25915bddc1)
+
+We want to add the folder where we just downloaded our Splunk Enterprise installer to. Check all the boxes *(Read-only, Auto-mount, Make permanent)* and click "Ok".
+
+![30 Add Share](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/f3371d1d-d1ee-491e-8bf1-e55dba1aa00a)
+
+Now lets reboot our machine by typing *sudo reboot*.
+
+Now it's time to add our user to the Vbox sf group. Type *sudo adduser yourusernamehere vboxsf*. It will prompt you for your password. Enter it, and now your user should be added to the group.
+
+![32 adduser vbox](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/7d405add-dc5b-4c54-a32b-cf1daff7b3fd)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <h2>Install and Configure Sysmon and Splunk Universal Forwarder</h2> 
 
 Now we need to set up Sysmon and Splunk Universal Forwader on our Windows 2022 Server and target machine. The process is exactly the same for both machines, so I will walk through how to do it on one machine, and you may replicate it on the other machine as well. 
+
+
 
 
 
