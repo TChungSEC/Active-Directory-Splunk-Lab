@@ -1,4 +1,4 @@
-![image](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/ba4f5e2f-9d41-4492-982f-21baeea82b4b)# Active-Directory-Splunk-Lab
+# Active-Directory-Splunk-Lab
 
 <h2>Description</h2>
 In this lab we will create be creating 4 different Virtual Machines (VMs). A Windows server with Active Directory, a Splunk server, a Windows target machine, and a Kali Linux instance. We will be setting up A Splunk server to monitor logs sent from our Windows server and target machine (enabled by Sysmon and Splunk Universal Forwarder), and later use Kali Linux to attempt an RDP (Remote Desktop Protocol) bruteforce on our Active Directory so we can analyze those logs. I will not be walking through the installation of the Windows or Kali machine, but will include a walkthrough of setting up and configuring the machines.
