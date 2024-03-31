@@ -23,6 +23,20 @@ I recommend at least 8gb of RAM to complete this lab. Any less and you likely wi
 
 ![3 example naming path](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/115de60e-964c-4137-8d55-ae6d95f297f9)
 
+<h2>Setting up NAT Networking</h2> 
+After installing all 4 VMs, refer back to this guide for setting up NAT networking on your machines.
+
+In Virtualbox, navigate to Tool > Network.
+
+![21 set network to NATTY](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/c6e23a5e-b120-4720-8535-b1b718f98e49)
+
+From here navigate to the NAT Network tab, and click "Create". At the bottom name it to whatever you want. In the IP section, put 192.168.10.0/24. Enable DHCP and select "Apply".
+
+![22 SETUP NATTY](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/e6db9b09-d768-4170-a503-f5a5c15ced14)
+
+Now for *all* of your VMs you're using for this lab, select the VM, navigate to "Settings", select "Network" on the left hand side, and change the "Attached to" setting from "NAT" to "NAT Network".
+
+![23 SETUP NATTY](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/deae55e7-8acb-47f2-938e-58bd021c7b5e)
 
 <h2>Visualizing this Lab</h2> 
 In This Lab we will have 4 machines. First, our Splunk Server. It will be ingesting logs from our other machines and hosting them for us to view when we input it's target IP into our browser. Second, A Windows Server running AD (Active Directory) collecting and sending logs to the Splunk server via Sysmon & Splunk Universal Forwarder. Third, A Windows user machine connected to the Active Directory Server, also sending logs to Splunk via Sysmon and Splunk Universal Forwarder. Lastly, a Kali Linux instance we will be using to bruteforce an RDP logon on our target machine at the very end. I have pre-assigned IPs to each machine, and you may copy them to ensure everything runs smoothly.
@@ -85,9 +99,13 @@ After finishing you will be met with this screen. Go ahead and press enter and o
 
 ![20 upgrade n update screen](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/9cbc145b-7154-4423-9f2e-da3b6b619257)
 
+Now that Splunk is installed and operational, refer to the "*Setting up NAT Networking*" of this guide above to enable NAT Networking on all your machines.
+
 <h2>Install and Configure Sysmon and Splunk Universal Forwarder</h2> 
 
 Now we need to set up Sysmon and Splunk Universal Forwader on our Windows 2022 Server and target machine. The process is exactly the same for both machines, so I will walk through how to do it on one machine, and you may replicate it on the other machine as well. 
+
+
 
 
 
