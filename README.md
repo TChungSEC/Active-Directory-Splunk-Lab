@@ -43,7 +43,7 @@ In This Lab we will have 4 machines. First, our Splunk Server. It will be ingest
 
 ![Active Directory Lab Diagram](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/62aeda4d-0085-44bf-89de-f93a2061a251)
 
-<h2>Installing Splunk</h2> 
+<h2>Installing and Configuring Splunk</h2> 
 At this point in the lab, it is assumed you have already downloaded and setup the Windows target machine, Windows Server, and Kali in your virtualization software of choice already. If you have not done that yet, please do so with the settings I've specified in the pre-requisites section. After pre-configuring up Splunk and initializing it for the first time, you will met with this screen.
 
 ![7 Ubuntu install](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/44b57622-66ff-4581-9959-ed60583f6d3d)
@@ -160,6 +160,60 @@ Now lets reboot our machine by typing *sudo reboot*.
 Now it's time to add our user to the Vbox sf group. Type *sudo adduser yourusernamehere vboxsf*. It will prompt you for your password. Enter it, and now your user should be added to the group.
 
 ![32 adduser vbox](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/7d405add-dc5b-4c54-a32b-cf1daff7b3fd)
+
+Next, make a directory called "share". Type *mkdir share* to create it.
+
+Now we want to mount our shared folder to our directory called "share" to do that, type the following. Make sure to replace the name of the folder with whatever you named yours.
+
+![33 link share foolder](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/5a3032af-ca11-41fb-a9b2-7e4c1188d068)
+
+Confirm that we were successful by typing *ls -la*.
+
+![34 it exists](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/d7e105b5-53b9-48b5-82c1-a24e7d1b05be)
+
+After confirming our directory was made, we will change directories into "share". Type *cd share/*.
+
+Now type ls -la to see all the files listed in the directory, including our splunk installer from our host machine.
+
+![35 cd baby](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/ad62c7e9-acd6-4fc7-ae5f-fb9902c002b9)
+
+Now we will install Splunk Enterprise from the share folder by typing the following:
+
+![36 install splunk](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/0c04f406-0e1e-4d2b-9e57-9db8baa9bb7f)
+
+After it completes we can change directory to where Splunk is located. This will be under */opt/splunk*. So cd there.
+
+Let's change to the user splunk. To do this, type: *sudo -u splunk bash*. 
+
+![37 become the SPLUNK](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/054d3b9b-fd66-4b4b-88e1-9269eb62a73f)
+
+Now change directory to bin. Type *cd bin*. This is where all the binaries Splunk can use are located. We are going to use *./splunk*. Type *./splunk start* to begin the installer.
+
+We'll get the licenses and agreements page, hit "q" then "y" to accept, followed by the administrative username and password. 
+
+After finishing, lets input one more additional command to make sure Splunk starts up every time we boot and reboot our virtual machine.
+
+Type *exit* to exit out of the user splunk and back to the administrative user. Then, *cd bin*.
+
+After that, input the following:
+
+![38 start splunk errytime](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/7628a225-a782-417f-bc5f-73d1aa227104)
+
+Now, anytime the virtual machine starts it will run as the user "splunk". Congratulations, we are done configuring our Splunk machine!
+
+<h2>Installing and configuring Sysmon and Splunk Universal Forwarder on Target PC and Windows Server</h2> 
+
+The process for installing and configuring both Sysmon and Splunk Universal Forwarder are nearly identical for both machines. This walkthrough shows how to do it on the Target PC, but you can emulate the steps again to configure for the Windows Server as well.
+
+
+
+
+
+
+
+
+
+
 
 
 
