@@ -1,18 +1,20 @@
 # Active-Directory-Splunk-Lab
 
 <h2>Description</h2>
-In this lab we will create be creating 4 different Virtual Machines (VMs). A Windows server with Active Directory, a Splunk server, a Windows target machine, and a Kali Linux instance. We will be setting up A Splunk server to monitor logs sent from our Windows server and target machine (enabled by Sysmon and Splunk Universal Forwarder), and later use Kali Linux to attempt an RDP (Remote Desktop Protocol) bruteforce on our Active Directory so we can analyze those logs. I will not be walking through the installation of the Windows or Kali machine, but will include a walkthrough of setting up and configuring the machines.
+In this lab we will create be creating 4 different Virtual Machines (VMs). A Windows server with Active Directory, a Splunk server, a Windows target machine, and a Kali Linux instance. We will be setting up A Splunk server to monitor logs sent from our Windows server and target machine (enabled by Sysmon and Splunk Universal Forwarder), and later use Kali Linux to attempt an RDP (Remote Desktop Protocol) bruteforce on our Active Directory so we can analyze those logs. Finally, we will use Atomic Red Team to (($*%*%(3
+I will not be walking through the installation of the Windows or Kali machine, but will include a walkthrough of setting up and configuring the machines.
 
 <h2>Environments & Tools used:</h2>
 
-- <b>Splunk</b> (https://www.splunk.com/en_us/download/splunk-enterprise.html)
+- <b>Splunk Enterprise</b> (https://www.splunk.com/en_us/download/splunk-enterprise.html)
 - <b>Windows 10</b> (https://go.microsoft.com/fwlink/?LinkId=2265055)
 - <b>Windows Server 2022</b> (https://info.microsoft.com/ww-landing-windows-server-2022.html)
 - <b>Kali Linux</b> (https://www.kali.org/get-kali/#kali-virtual-machines)
 - <b>Oracle VirtualBox VM</b> (https://www.virtualbox.org/wiki/Downloads)
 - <b>Sysmon</b> (https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 - <b>Splunk Universal Forwarder</b> (https://www.splunk.com/en_us/download/universal-forwarder.html)
-- <b>Microsoft Active Directory</b>
+- <b>Microsoft Active Directory</b> (Included within Windows Server 2022)
+- <b>Atomic Red Team</b>
 
 <h2>Pre-requsites:</h2>
 I recommend at least 8gb of RAM to complete this lab. Any less and you likely will have problems running the machines simultaneously (often 3 are required to run at once.) Please set up the VMs in your virtualization software of choice. For this lab I am using VirtualBox. (Walkthrough on Splunk setup further in the lab.) Make sure the NAT type is set to NAT Networking, and allocate at least 25GB per machine (recommended 50GB). If you have less than 8GB of RAM, I recommend allocating 2GB of RAM for each machine. If you have >16GB, you may allocated more for a smoother experience. Let's begin!
@@ -432,132 +434,146 @@ Congrats, you should be logged in as user "jsmith" now. Your target machine is n
 
 <h2>Using Kali Linux to Conduct a Brute Force Attack</h2>
 
+Now it's time to log into our Kali machine and change the IP to match our graph, which in this case *192.168.10.250*. The default credentials are *kali/kali*.
 
+To do this, right-click the eternet icon in the top right and from the drop-down menu, select "Edit Connections".
 
+Select the first profile under "Ethernets", which in my case was "Wired connection 1", and in the bottom left of the window select the cog icon.
 
+Now navigate to the "IPv4 Settings" tab, and change "Method" to "Manual". In the "Addresses" section select "Add", and input your desired IP. You can copy my setting below. Apply the settings, and exit the windows. Right click the ethernet icon again and select "Disconnect", then click it again and select your profile you just modified to reset the connection and reflect our new static IP address.
 
+![60 network setup](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/66e38656-5f00-42ae-bea9-ce403077d190)
 
+Now it's time to update and upgrade our repositiories, open terminal, and use the following command:
 
+![61 kali updatenupgrade](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/194f4422-1c9c-40fd-9af2-eee71902e187)
 
+After we are updated and upgraded, we can begin setting up the attack. Let's first make a directory on our desktop to put the tools we'll be using today into. Type *mkdir yourdirectorynamehere* to do so. I named my directory *ad-project*.
 
+Now it's time to install our bruteforcing tool, **crowbar**. You can do this with the following command:
 
+![62 crowburr](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/35f8effa-dd3d-4edf-94de-2c5a4e2b0fe9)
 
+Before using a bruteforcing tool, it needs to be paired with a wordlist. The wordlist we'll use for this proof of concept is *rockyou.txt*. It comes pre-installed with Kali Linux.
 
+The wordlist is found here: 
 
+![63 wordlists](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/aabaa5d4-49a2-40aa-bdc5-3619c5364f6d)
 
+You can verify it's existance with the *ls* command.
 
+![64 rocku](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/7e0fb526-4981-48a3-8232-6d6e8feb383a)
 
+We can see it's saved as a .gz file, so we need to unzip it. We'll use gunzip to do so. Use the following syntax to unzip it: 
 
+![65 unzip rocku](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/85610337-8917-41bb-90b4-9bc42915368b)
 
+Now it should be unzipped in the directory as *rockyou.txt*.
 
+Now it's time to copy the wordlist to the directory we created for this project. Use the following command to do that: *cp rockyou.txt ~/Desktop/ad-project/*.
+After copying it change directories to the directory you created *(ad-project for us.)*
 
+![66 copy it](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/c34c07a4-d1e0-4717-94df-8c11619aece2)
 
+rockyou.txt is a huge text file. It is about 134 MBs. For this demo, we don't want to waste our time going through all of it, epspecially because we already know the passwords of the users we'll be bruteforcing. So instead, we'll use the first 20 lines and append our user passwords to the list to save on time.
 
+To do that, we'll use the command: *head -n 20 rockyou.txt*. Press enter and you'll see just the first 20 lines cat'd out.
 
+![68 rock u first 20](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/ea1af04d-8ac2-4d55-9118-18d9a5732cfb)
 
+Now output these 20 lines to a new file called *passwords.txt*. To do that, just input: *head -n 20 rockyou.txt > passwords.txt*
 
+![69 first 20 rocku new txt](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/ffe572dc-f8c0-4e86-a964-b1f3a2d9155c)
 
+Let's appened our password(s) from our AD users we created to the list. In my case, tchung and jsmith's password.
 
+We'll need to open the list in a text editor, so type: *nano passwords.txt*. At the very bottom, type in the super-secure password(s) you created earlier for your AD users. In my case, the password was simply *Password1*. To save, press "Ctrl + x", "y", and "Enter". Done!
 
+![70 super secure password, added](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/2f6d9772-3838-4791-8ffa-6e64c07de818)
 
+Before launching our attack, let's make sure RDP is enabled on our Windows target machine. So head over to that machine, and search for "PC" and select "Properties".
+Scroll down and select "Advanced system settings". You'll be prompted to login with the administrator account. Do that, and then select the "Remote" tab. At the bottom, select "Allow remote connections to this computer".
 
+![71 add rdp users](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/7108d69b-7e42-488e-9ecc-d4ca85e871c2)
 
+Next select "Select Users", and add your users to the field. Mine are "tchung, jsmith, and kjames". Click "OK". And "Apply", then "OK" again and we'll be set to bruteforce.
 
+![72 add users names](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/8a55e348-3cb2-44d8-b88c-5af241b126ac)
 
+Head back over to Kali, and in Crowbar type the following to begin the bruteforce process using Crowbar. *crowbar -b rdp -u accountnamehere -C passwords.txt -s 192.168.10.100/32*. After pressing enter, Crowbar will attempt to bruteforce using all the passwords in our specified password list. I attempted a bruteforce on both *kjames* and *jsmith*. You can see they were successful.
 
+![74 crowbar success kjames](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/9832b6d1-69eb-48c6-9eb0-5ca28c8b99fc)
 
+jsmith:
 
+![74 crowbar success](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/20c57d40-debc-44ee-bafa-790304a26fb9)
 
+Congratulations! You have successfully attempted a bruteforce login via rdp on your Active Directory users.
 
+<h2>Viewing Telemetry Data via Splunk</h2>
+Now because our Windows target machine and server are both sending telemetry data over to our SIEM, Splunk, we can search in our endpoint index for the data. We will specifically be looking for unsuccessful logins. Generally, multiple unsuccessful login codes in rapid success in indicitive of a bruteforce attack.
 
+Navigate back to your Splunk web portal, and login. Back in the search and reporting page, we can search our endpoint index for the bruteforce events. By searching the specific user and error code (4625 is the unsuccessful login error code) we can see the telemetry data. There are other ways to search for this data, you could just search for the user and the timeframe but this really narrows down to exactly what were looking for.
 
+![75 splunk incident search](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/911773c1-49ec-4957-b7e8-54fa49f8a9cc)
 
+After searching for incidents involving *kjames* and error code 4625 (failed login error code), we can see multiple events logging failed login attempts at the same time in rapid succession (again, highly indicitive of a brute force attack).
 
+![76 evidence of bruteforce](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/a19d744f-5908-4f17-aa7c-4140b6098987)
 
+By selecting any of the individual events, we can gather even more information, such as the machine that attempted the logon we can see kali was used, which is a clear sign of bruteforce activity as Kali is a pentester disro.
 
+![77 kali evidence](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/594e772e-dd45-4c77-bf63-64f5bf93adba)
 
+Now by searching for the event *4624* (successful login event code), we can see there was a successful login, right around the same time as the unsuccessful logins. Based on all this information, we can rightfully assume a successful bruteforce attack has occured.
 
+![78 logon success](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/ccf12fce-4424-4012-af3b-3d1398b9a3a9)
 
+Very neat. At this point, we have configured 4 different VMs, set up Splunk, an AD server, attempted a successful bruteforce via kali with Crowbar, and learned how to read and find telemetric data in Splunk. 
 
+To learn more about different event codes to further your study with your new lab, you can use (ultimatewindowssecurity.com) to search event codes and their meanings. 
 
+<h2>Atomic Red Team</h2>
+This part of the lab is optional, but is valuable and fun way to gather insight about the vulnerabilities our machine is susceptible to.
 
+Before installing Atom Red Team (ART), we need to set the execution policy to bypass the current user. In Powershell type in the following command: *Set -ExecutionPolicy Bypass CurrentUser*.
+Select "y", and then "Enter" To confirm.
 
+![79 bypass currentusr](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/f8041f10-56d4-4ead-bda6-744d4a76a65b)
 
+Now we will get to installing ART. Before we do that we need to set up a Microsoft Defender exclusion for our C: drive because it will detect and remove some of the files from ART as malicious. To do this, select the up arrow in the bottom right of your windows tool bar, and then from the menu select the shield icon (Windows Security). Here, click on "Virus & threat protection". On the next page, select "Manage settings". Scroll down, and under "Exclusions", select "Add or remove exclusion". On the next page select "+ Add an exclusion" and select "Folder" from the drop-down menu. Simply navigate to your PC and then select your C: drive and then "Select Folder". You'll need to login again as admin, but after this you should be set.
 
+Head back to Powershell, and type the following command. This will install ART on your target machine. When prompted select "y" to install the target dependencies.
 
+![80 ART install syntax](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/d47db0d3-501b-4c35-8c92-a4d8e5821605)
 
+After install, in our C: drive you should see a folder called "AtomicRedTeam" and within it a folder called "atomics". It will be full of folders with names like T1103.05, T1136, etc. These are technique id's that correlate with attacks in the MITRE ATT&CK framework (found here (https://attack.mitre.org/)).
 
+![81 ART atomics](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/eaca6887-6670-432a-859f-407a7087168a)
 
+If you head to the MITRE ATT&CK index page, you can see a list of possible attacks and their corresponding codes. For example, we can see the "Local Account" under the  "Create account" attack and it's corresponding ID of T1136.001.
 
+![82 Mitre attack directory](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/3101ff03-9966-4588-91a5-3843bca52d8b)
 
+If we take a look back at our atomics directory, we can see we have a directory called T1136.001.
 
+![83 corresponding directory](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/e667102c-95cf-4eec-8495-7270c1622276)
 
+To test the command, in Powershell, we type *Invoke-AtomicTest T1136.001*.
 
+![84 powrshell command](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/2e532f74-9aa4-4dd8-8820-16382f4f0712)
 
+After running the command, it will automatically generate telemetry based on creating a local account.
 
+![85 Telemetry data](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/fade9392-3b78-4d7c-aadd-4866c9656ed1)
 
+We can see that the attack generated an account called "NewLocalUser". 
 
+So if we navigate back to Splunk and search for "NewLocalUser in our endpoint index, it should show up. If it doesn't this can actually be good. it shows we have gaps in visibilty. This is what makes ART useful, it creates telemetry to see if we're able to even detect the attacks and shows us what we need to improve on/fix. If it does show up, we know are defenses are prepared against this sort of attack.
 
+![86 no results](https://github.com/TChungSEC/Active-Directory-Splunk-Lab/assets/164605938/8172db7b-ed3b-4a19-8bd9-8e776697096b)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+That's it for this lab. We have completed everything. Feel free to continue playing with ART and Splunk, to get a better understanding of each and increase your know-how and practical knowledge as an analyst. If you've made it this far, thank you for following along, and remember to stay curious and remember there is always something new to learn.
 
 <!--
  ```diff
