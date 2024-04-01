@@ -1,7 +1,7 @@
 # Active-Directory-Splunk-Lab
 
 <h2>Description</h2>
-In this lab we will create be creating 4 different Virtual Machines (VMs). A Windows server with Active Directory, a Splunk server, a Windows target machine, and a Kali Linux instance. We will be setting up A Splunk server to monitor logs sent from our Windows server and target machine (enabled by Sysmon and Splunk Universal Forwarder), and later use Kali Linux to attempt an RDP (Remote Desktop Protocol) bruteforce on our Active Directory so we can analyze those logs. Finally, we will use Atomic Red Team to (($*%*%(3
+In this lab we will create be creating 4 different Virtual Machines (VMs). A Windows server with Active Directory, a Splunk server, a Windows target machine, and a Kali Linux instance. We will be setting up A Splunk server to monitor logs sent from our Windows server and target machine (enabled by Sysmon and Splunk Universal Forwarder), and later use Kali Linux to attempt an RDP (Remote Desktop Protocol) bruteforce on our Active Directory so we can analyze those logs. Finally, we will use Atomic Red Team to generate telemetry data to explore in Splunk.
 I will not be walking through the installation of the Windows or Kali machine, but will include a walkthrough of setting up and configuring the machines.
 
 <h2>Environments & Tools used:</h2>
@@ -14,7 +14,7 @@ I will not be walking through the installation of the Windows or Kali machine, b
 - <b>Sysmon</b> (https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 - <b>Splunk Universal Forwarder</b> (https://www.splunk.com/en_us/download/universal-forwarder.html)
 - <b>Microsoft Active Directory</b> (Included within Windows Server 2022)
-- <b>Atomic Red Team</b>
+- <b>Atomic Red Team</b> (Installed via Powershell)
 
 <h2>Pre-requsites:</h2>
 I recommend at least 8gb of RAM to complete this lab. Any less and you likely will have problems running the machines simultaneously (often 3 are required to run at once.) Please set up the VMs in your virtualization software of choice. For this lab I am using VirtualBox. (Walkthrough on Splunk setup further in the lab.) Make sure the NAT type is set to NAT Networking, and allocate at least 25GB per machine (recommended 50GB). If you have less than 8GB of RAM, I recommend allocating 2GB of RAM for each machine. If you have >16GB, you may allocated more for a smoother experience. Let's begin!
